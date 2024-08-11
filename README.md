@@ -133,7 +133,7 @@ Add the following configuration.
         ListenStream=/run/gunicorn.sock
         [Install]
         WantedBy=sockets.target
-      ```
+   ```
    - Create a system service file for Gunicorn:
      ```bash
      sudo nano /etc/systemd/system/gunicorn.service
