@@ -126,7 +126,7 @@ Next, you need to create a systemd service file to manage the Django. First, cre
     nano /etc/systemd/system/gunicorn.socket
 ```
 Add the following configuration.
-       ```bash 
+  ```bash 
         [Unit]
         Description=gunicorn socket
         [Socket]
