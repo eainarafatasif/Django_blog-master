@@ -119,36 +119,46 @@ ufw allow 443
 ### 7. **Set Up Gunicorn**
    ```bash
    pip install gunicorn
-   gunicorn --workers 3 --bind unix:/var/www/html/django-unfold/gunicorn.sock django_unfold.wsgi:application
+   gunicorn --bind 0.0.0.0:8000 djangoproject.wsgi
    ```
-
-   - Create a systemd service file for Gunicorn:
+Next, you need to create a systemd service file to manage the Django. First, create a Gunicorn socket file.
+ ```bash
+    nano /etc/systemd/system/gunicorn.socket
+```
+Add the following configuration.
+       ```bash 
+        [Unit]
+        Description=gunicorn socket
+        [Socket]
+        ListenStream=/run/gunicorn.sock
+        [Install]
+        WantedBy=sockets.target
+      ```
+   - Create a system service file for Gunicorn:
      ```bash
      sudo nano /etc/systemd/system/gunicorn.service
      ```
      - Add the following:
-       ```ini
+       ```bash
        [Unit]
-       Description=gunicorn daemon
-       After=network.target
-
-       [Service]
-       User=www-data
-       Group=www-data
-       WorkingDirectory=/var/www/html/django-unfold
-       ExecStart=/var/www/html/django-unfold/projectenv/bin/gunicorn \
-                 --access-logfile - \
-                 --workers 3 \
-                 --bind unix:/var/www/html/django-unfold/gunicorn.sock \
-                 django_unfold.wsgi:application
-
-       [Install]
-       WantedBy=multi-user.target
+        Description=gunicorn daemon
+        Requires=gunicorn.socket
+        After=network.target
+        [Service]
+        User=root
+        Group=www-data
+        WorkingDirectory=/root/project
+                ExecStart=/root/project/djangoenv/bin/gunicorn --access-logfile - --workers 3 --bind unix:/run/gunicorn.sock djangoproject.wsgi:application
+            [Install]
+        WantedBy=multi-user.target
        ```
      - Enable and start the Gunicorn service:
        ```bash
        sudo systemctl start gunicorn
        sudo systemctl enable gunicorn
+       systemctl start gunicorn.socket
+       systemctl enable gunicorn.socket
+       
        ```
 
 ### 8. **Configure Nginx**
